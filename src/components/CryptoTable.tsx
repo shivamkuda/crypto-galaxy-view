@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCryptoList, formatCurrency, formatLargeNumber, formatPercent } from '@/utils/api';
@@ -15,7 +14,7 @@ const CryptoTable: React.FC = () => {
     queryKey: ['cryptos', page],
     queryFn: () => fetchCryptoList(page, perPage),
     refetchInterval: 30000,
-    placeholderData: 'keepPrevious',
+    placeholderData: (previousData) => previousData,
   });
 
   if (isLoading) {
