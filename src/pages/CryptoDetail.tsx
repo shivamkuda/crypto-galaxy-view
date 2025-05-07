@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +7,7 @@ import PriceChart from '@/components/PriceChart';
 import { ArrowUp, ArrowDown, Globe, Coins, ChartBar } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import WalletModal from '@/components/WalletModal';
 
 const CryptoDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -97,7 +97,7 @@ const CryptoDetail = () => {
             alt={crypto.name} 
             className="w-12 h-12 rounded-full"
           />
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold flex items-center">
               {crypto.name}
               <span className="ml-2 text-sm font-normal text-muted-foreground uppercase">
@@ -124,6 +124,13 @@ const CryptoDetail = () => {
                 </span>
               )}
             </div>
+          </div>
+          <div>
+            <WalletModal 
+              cryptoId={id} 
+              cryptoName={crypto.name} 
+              currentPrice={crypto.market_data?.current_price?.usd || 0} 
+            />
           </div>
         </div>
         

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import CryptoDetail from "./pages/CryptoDetail";
 import Trending from "./pages/Trending";
 import NotFound from "./pages/NotFound";
+import Wallet from "./pages/Wallet";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/crypto/:id" element={<CryptoDetail />} />
           <Route path="/trending" element={<Trending />} />
+          <Route path="/wallet" element={<Wallet />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

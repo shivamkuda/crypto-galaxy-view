@@ -39,6 +39,12 @@ const Header: React.FC = () => {
           >
             Markets
           </Link>
+          <Link 
+            to="/wallet" 
+            className="text-sm font-medium transition-colors hover:text-galaxy-accent"
+          >
+            Wallet
+          </Link>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -52,14 +58,16 @@ const Header: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="hidden sm:flex border-galaxy-accent text-galaxy-accent hover:bg-galaxy-accent hover:text-galaxy-bg"
-          >
-            <ChartBar className="mr-2 h-4 w-4" />
-            Connect
-          </Button>
+          <Link to="/wallet">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="hidden sm:flex border-galaxy-accent text-galaxy-accent hover:bg-galaxy-accent hover:text-galaxy-bg"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Wallet
+            </Button>
+          </Link>
         </div>
       </div>
     </header>
