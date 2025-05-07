@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCryptoChart } from '@/utils/api';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle } from 'lucide-react';
 
 interface PriceChartProps {
   cryptoId: string;
@@ -12,12 +13,20 @@ interface PriceChartProps {
 
 const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   const [timeRange, setTimeRange] = useState<number>(7); // Default to 7 days
+  const [retryCount, setRetryCount] = useState(0);
   
-  const { data: chartData, isLoading } = useQuery({
-    queryKey: ['chart', cryptoId, timeRange],
+  const { data: chartData, isLoading, error, refetch } = useQuery({
+    queryKey: ['chart', cryptoId, timeRange, retryCount],
     queryFn: () => fetchCryptoChart(cryptoId, timeRange),
     refetchInterval: timeRange === 1 ? 60000 : false, // Refetch every minute for 1-day charts
+    retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+  
+  // Function to handle retry when chart fails to load
+  const handleRetry = () => {
+    setRetryCount(count => count + 1);
+  };
   
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp);
@@ -48,7 +57,16 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   }
 
   if (!chartData || chartData.prices.length === 0) {
-    return <div className="p-4 bg-galaxy-card-bg rounded-lg text-center">Chart data unavailable</div>;
+    return (
+      <div className="p-8 bg-galaxy-card-bg rounded-lg text-center border border-galaxy-secondary">
+        <AlertCircle className="mx-auto h-12 w-12 text-galaxy-negative mb-4" />
+        <h3 className="text-lg font-medium mb-2">Chart data unavailable</h3>
+        <p className="text-muted-foreground mb-4">We couldn't load the chart data for this cryptocurrency.</p>
+        <Button onClick={handleRetry} variant="secondary" size="sm">
+          Try again
+        </Button>
+      </div>
+    );
   }
 
   // Format the chart data for Recharts
