@@ -15,7 +15,7 @@ const CryptoTable: React.FC = () => {
     queryKey: ['cryptos', page],
     queryFn: () => fetchCryptoList(page, perPage),
     refetchInterval: 30000,
-    keepPreviousData: true,
+    placeholderData: 'keepPrevious',
   });
 
   if (isLoading) {
