@@ -88,15 +88,33 @@ export const fetchCryptoChart = async (
   days: number = 7
 ): Promise<ChartData | null> => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/coins/${id}/market_chart?vs_currency=usd&days=${days}`
-    );
+    // Add proper error handling with retries
+    let retries = 3;
+    let response;
     
-    if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+    while (retries > 0) {
+      response = await fetch(
+        `${API_BASE_URL}/coins/${id}/market_chart?vs_currency=usd&days=${days}`
+      );
+      
+      if (response.ok) break;
+      
+      retries--;
+      if (retries === 0) {
+        throw new Error(`API Error: ${response.status}`);
+      }
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    return await response.json();
+    if (!response || !response.ok) {
+      throw new Error('Failed to fetch chart data after retries');
+    }
+    
+    const data = await response.json();
+    console.log(`Chart data for ${id} (${days} days) loaded successfully`, data.prices.length);
+    return data;
   } catch (error) {
     console.error(`Failed to fetch chart data for ${id}:`, error);
     return null;

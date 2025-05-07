@@ -37,8 +37,8 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   if (isLoading) {
     return (
       <div className="w-full">
-        <div className="flex justify-end mb-4 space-x-2 animate-pulse">
-          {[1, 7, 30, 90, 365].map((day) => (
+        <div className="flex flex-wrap justify-end mb-4 gap-2 animate-pulse">
+          {[1, 7, 30, 365].map((day) => (
             <Skeleton key={day} className="h-8 w-14" />
           ))}
         </div>
@@ -64,12 +64,11 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-4 space-x-2">
+      <div className="flex flex-wrap justify-end mb-4 gap-2">
         {[
           { days: 1, label: '1D' }, 
           { days: 7, label: '7D' }, 
           { days: 30, label: '1M' }, 
-          { days: 90, label: '3M' }, 
           { days: 365, label: '1Y' }
         ].map(({ days, label }) => (
           <Button
@@ -88,7 +87,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
       
       <div className="p-4 bg-galaxy-card-bg rounded-lg border border-galaxy-secondary">
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
+          <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#323232" />
             <XAxis 
               dataKey="timestamp" 
@@ -114,7 +113,8 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
                 borderColor: '#3A0CA3',
                 borderRadius: '0.375rem',
                 color: 'white'
-              }} 
+              }}
+              isAnimationActive={true}
             />
             <Line 
               type="monotone" 
@@ -122,7 +122,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
               stroke={lineColor} 
               strokeWidth={2} 
               dot={false} 
-              activeDot={{ r: 4, stroke: lineColor, strokeWidth: 1 }} 
+              activeDot={{ r: 4, stroke: lineColor, strokeWidth: 1 }}
+              isAnimationActive={true}
+              animationDuration={1000}
+              animationEasing="ease-in-out"
             />
           </LineChart>
         </ResponsiveContainer>
