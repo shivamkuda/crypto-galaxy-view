@@ -6,13 +6,13 @@ import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import CurrencyToggle from './CurrencyToggle';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
-  const { isMobile } = useMobile();
+  const isMobile = useIsMobile();
 
   const handleLogout = () => {
     logout();
@@ -61,7 +61,7 @@ const Header: React.FC = () => {
                 </Link>
               </Button>
             </li>
-            {isAuthenticated ? (
+            {user ? (
               <>
                 <li>
                   <Button
