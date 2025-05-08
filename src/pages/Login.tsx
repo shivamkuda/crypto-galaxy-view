@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet, LogIn } from 'lucide-react';
+import { Wallet, LogIn, ArrowLeft } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -49,8 +49,23 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-galaxy-bg p-4">
+      <div className="w-full max-w-md mb-4">
+        <Button 
+          variant="ghost" 
+          onClick={handleGoBack}
+          className="flex items-center text-galaxy-accent hover:text-galaxy-accent/90"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+      </div>
+      
       <Link to="/" className="flex items-center mb-8 space-x-2">
         <Wallet className="w-8 h-8 text-galaxy-accent" />
         <span className="text-xl font-bold bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
