@@ -1,16 +1,19 @@
+
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCryptoDetails, formatCurrency, formatLargeNumber, formatPercent } from '@/utils/api';
+import { fetchCryptoDetails, formatPercent } from '@/utils/api';
 import Header from '@/components/Header';
 import PriceChart from '@/components/PriceChart';
 import { ArrowUp, ArrowDown, Globe, Coins, ChartBar } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import WalletModal from '@/components/WalletModal';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const CryptoDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { formatPrice } = useCurrency();
   
   const { data: crypto, isLoading } = useQuery({
     queryKey: ['crypto', id],
@@ -111,7 +114,7 @@ const CryptoDetail = () => {
             </h1>
             <div className="flex items-center">
               <span className="text-2xl font-bold mr-2">
-                {formatCurrency(crypto.market_data?.current_price?.usd)}
+                {formatPrice(crypto.market_data?.current_price?.usd)}
               </span>
               {priceChangePercent24h !== undefined && (
                 <span className={isPriceUp ? "price-up" : "price-down"}>
@@ -145,7 +148,7 @@ const CryptoDetail = () => {
               <ChartBar className="h-4 w-4 text-galaxy-accent" />
             </div>
             <span className="text-lg font-medium">
-              {formatLargeNumber(crypto.market_data?.market_cap?.usd)}
+              {formatPrice(crypto.market_data?.market_cap?.usd)}
             </span>
           </div>
           
@@ -155,7 +158,7 @@ const CryptoDetail = () => {
               <ChartBar className="h-4 w-4 text-galaxy-accent" />
             </div>
             <span className="text-lg font-medium">
-              {formatLargeNumber(crypto.market_data?.total_volume?.usd)}
+              {formatPrice(crypto.market_data?.total_volume?.usd)}
             </span>
           </div>
           
@@ -188,7 +191,7 @@ const CryptoDetail = () => {
             </div>
             <div>
               <span className="text-lg font-medium">
-                {formatCurrency(crypto.market_data?.ath?.usd)}
+                {formatPrice(crypto.market_data?.ath?.usd)}
               </span>
               <span className="text-xs ml-2 text-muted-foreground">
                 {new Date(crypto.market_data?.ath_date?.usd).toLocaleDateString()}
@@ -203,7 +206,7 @@ const CryptoDetail = () => {
             </div>
             <div>
               <span className="text-lg font-medium">
-                {formatCurrency(crypto.market_data?.atl?.usd)}
+                {formatPrice(crypto.market_data?.atl?.usd)}
               </span>
               <span className="text-xs ml-2 text-muted-foreground">
                 {new Date(crypto.market_data?.atl_date?.usd).toLocaleDateString()}

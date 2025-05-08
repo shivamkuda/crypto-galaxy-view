@@ -1,160 +1,128 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Wallet, TrendingUp, LogIn, UserPlus, LogOut, User } from 'lucide-react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from '@/hooks/use-toast';
+import CurrencyToggle from './CurrencyToggle';
+import { useMobile } from '@/hooks/use-mobile';
 
 const Header: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, logout, user } = useAuth();
   const { toast } = useToast();
-  
+  const { isMobile } = useMobile();
+
   const handleLogout = () => {
     logout();
     toast({
       title: "Logged out",
-      description: "You have been logged out successfully.",
+      description: "You have been successfully logged out.",
     });
-    navigate('/');
   };
 
-  const getUserInitials = () => {
-    if (!user) return "?";
-    if (user.username) {
-      return user.username.substring(0, 2).toUpperCase();
-    }
-    return user.email.substring(0, 2).toUpperCase();
-  };
-  
   return (
-    <header className="sticky top-0 z-50 w-full bg-galaxy-secondary/95 backdrop-blur supports-[backdrop-filter]:bg-galaxy-secondary/80 border-b border-galaxy-secondary">
-      <div className="container flex items-center justify-between h-16 px-4 mx-auto">
-        <div className="flex items-center gap-2">
+    <header className="bg-galaxy-secondary py-4 shadow-md">
+      <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center">
           <Link to="/" className="flex items-center space-x-2">
-            <Wallet className="w-8 h-8 text-galaxy-accent" />
-            <span className="text-xl font-bold bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
+            <Wallet className="h-6 w-6 text-galaxy-accent" />
+            <span className="font-bold text-lg bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
               CryptoGalaxyView
             </span>
           </Link>
         </div>
         
-        <div className="hidden md:flex items-center space-x-6">
-          <Link 
-            to="/" 
-            className="text-sm font-medium transition-colors hover:text-galaxy-accent"
-          >
-            Dashboard
-          </Link>
-          <Link 
-            to="/trending" 
-            className="text-sm font-medium transition-colors hover:text-galaxy-accent"
-          >
-            Trending
-          </Link>
-          <Link 
-            to="/markets" 
-            className="text-sm font-medium transition-colors hover:text-galaxy-accent"
-          >
-            Markets
-          </Link>
-          <Link 
-            to="/wallet" 
-            className="text-sm font-medium transition-colors hover:text-galaxy-accent"
-          >
-            Wallet
-          </Link>
+        <div className="flex items-center gap-2">
+          <CurrencyToggle />
         </div>
-        
-        <div className="flex items-center space-x-2">
-          <div className="relative w-full max-w-[200px] lg:max-w-[300px]">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full pl-8 bg-galaxy-card-bg border-galaxy-primary"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
 
-          {user ? (
-            <div className="flex items-center gap-2">
-              <Link to="/wallet">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="hidden sm:flex border-galaxy-accent text-galaxy-accent hover:bg-galaxy-accent hover:text-galaxy-bg"
-                >
-                  <Wallet className="mr-2 h-4 w-4" />
-                  Wallet
-                </Button>
-              </Link>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8 bg-galaxy-accent text-galaxy-bg">
-                      <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                    </Avatar>
+        <nav>
+          <ul className="flex items-center space-x-2">
+            <li>
+              <Button
+                variant={location.pathname === "/" ? "default" : "outline"}
+                size="sm"
+                asChild
+              >
+                <Link to="/">Market</Link>
+              </Button>
+            </li>
+            <li>
+              <Button
+                variant={location.pathname === "/trending" ? "default" : "outline"}
+                size="sm"
+                asChild
+              >
+                <Link to="/trending">
+                  {!isMobile && <TrendingUp className="mr-2 h-4 w-4" />}
+                  Trending
+                </Link>
+              </Button>
+            </li>
+            {isAuthenticated ? (
+              <>
+                <li>
+                  <Button
+                    variant={location.pathname === "/wallet" ? "default" : "outline"}
+                    size="sm"
+                    asChild
+                  >
+                    <Link to="/wallet">
+                      {!isMobile && <Wallet className="mr-2 h-4 w-4" />}
+                      Wallet
+                    </Link>
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-galaxy-card-bg border-galaxy-secondary">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/wallet')}>
-                    <Wallet className="mr-2 h-4 w-4" />
-                    <span>Wallet</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500" onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="border-galaxy-accent text-galaxy-accent hover:bg-galaxy-accent hover:text-galaxy-bg"
-                >
-                  <LogIn className="mr-2 h-4 w-4" />
-                  Login
-                </Button>
-              </Link>
-
-              <Link to="/signup" className="hidden sm:block">
-                <Button 
-                  size="sm" 
-                  className="bg-galaxy-accent text-galaxy-bg hover:bg-galaxy-accent/90"
-                >
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
+                </li>
+                <li className="ml-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm hidden md:inline-block">
+                      {user?.email}
+                    </span>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="text-galaxy-accent"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-galaxy-accent text-galaxy-accent"
+                    asChild
+                  >
+                    <Link to="/login">
+                      {!isMobile && <LogIn className="mr-2 h-4 w-4" />}
+                      Login
+                    </Link>
+                  </Button>
+                </li>
+                <li>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="bg-galaxy-accent hover:bg-galaxy-accent/90"
+                    asChild
+                  >
+                    <Link to="/signup">
+                      {!isMobile && <UserCircle2 className="mr-2 h-4 w-4" />}
+                      Sign Up
+                    </Link>
+                  </Button>
+                </li>
+              </>
+            )}
+          </ul>
+        </nav>
       </div>
     </header>
   );

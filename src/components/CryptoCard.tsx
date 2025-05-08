@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { TrendingCoin } from '@/types/crypto';
 import { ArrowUp, ArrowDown, TrendingUp } from 'lucide-react';
 import { formatPercent } from '@/utils/api';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface CryptoCardProps {
   trending: TrendingCoin;
@@ -14,6 +15,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ trending, trendingRank }) => {
   // Convert BTC price to approx USD (this is very rough estimation)
   const btcToUsd = 50000; // Simplified fixed value for demo purposes
   const estimatedPrice = trending.item.price_btc * btcToUsd;
+  const { formatPrice } = useCurrency();
   
   return (
     <Link to={`/crypto/${trending.item.id}`} className="block">
@@ -41,7 +43,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({ trending, trendingRank }) => {
             Rank #{trending.item.market_cap_rank || 'N/A'}
           </div>
           <div className="text-sm font-medium">
-            ~${estimatedPrice.toFixed(2)}
+            {formatPrice(estimatedPrice)}
           </div>
         </div>
       </div>

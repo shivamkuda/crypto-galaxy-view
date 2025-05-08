@@ -1,136 +1,167 @@
+
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCryptoList, formatCurrency, formatLargeNumber, formatPercent } from '@/utils/api';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { fetchCryptoList, formatPercent } from '@/utils/api';
+import { ArrowUp, ArrowDown, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const CryptoTable: React.FC = () => {
-  const [page, setPage] = useState<number>(1);
-  const perPage = 20;
-
-  const { data: cryptos, isLoading } = useQuery({
-    queryKey: ['cryptos', page],
-    queryFn: () => fetchCryptoList(page, perPage),
-    refetchInterval: 30000,
-    placeholderData: (previousData) => previousData,
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { formatPrice } = useCurrency();
+  
+  const { data: cryptoList, isLoading } = useQuery({
+    queryKey: ['cryptoList', page],
+    queryFn: () => fetchCryptoList(page),
+    staleTime: 60000, // 1 minute
   });
+
+  const filteredCryptoList = cryptoList?.filter(
+    crypto => 
+      crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
+  const handlePrevPage = () => {
+    if (page > 1) setPage(page - 1);
+  };
+  
+  const handleNextPage = () => {
+    setPage(page + 1);
+  };
 
   if (isLoading) {
     return (
-      <div className="w-full overflow-x-auto">
-        <div className="w-full border-b border-galaxy-secondary">
-          <div className="grid grid-cols-7 gap-4 px-4 py-3 text-sm font-medium text-muted-foreground">
-            <div>#</div>
-            <div>Name</div>
-            <div>Price</div>
-            <div>24h %</div>
-            <div className="hidden sm:block">Market Cap</div>
-            <div className="hidden md:block">Volume (24h)</div>
-            <div className="hidden lg:block">Circulating Supply</div>
-          </div>
+      <div className="overflow-x-auto">
+        <div className="mb-4">
+          <Skeleton className="h-10 w-full" />
         </div>
-        <div className="animate-pulse">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="grid grid-cols-7 gap-4 px-4 py-4 border-b border-galaxy-secondary">
-              <Skeleton className="h-5 w-5" />
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-8 w-8 rounded-full" />
-                <Skeleton className="h-4 w-20" />
-              </div>
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="hidden sm:block h-4 w-24" />
-              <Skeleton className="hidden md:block h-4 w-24" />
-              <Skeleton className="hidden lg:block h-4 w-28" />
-            </div>
-          ))}
+        <table className="w-full table-auto">
+          <thead>
+            <tr className="border-b border-galaxy-secondary">
+              <th className="px-4 py-3 text-left"># Rank</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-right">Price</th>
+              <th className="px-4 py-3 text-right">24h %</th>
+              <th className="px-4 py-3 text-right">Market Cap</th>
+              <th className="px-4 py-3 text-right">Volume (24h)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(10)].map((_, i) => (
+              <tr key={i} className="border-b border-galaxy-secondary/50">
+                <td className="px-4 py-4"><Skeleton className="h-4 w-8" /></td>
+                <td className="px-4 py-4">
+                  <div className="flex items-center">
+                    <Skeleton className="h-8 w-8 rounded-full mr-2" />
+                    <div>
+                      <Skeleton className="h-4 w-24 mb-1" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-4 text-right"><Skeleton className="h-4 w-24 ml-auto" /></td>
+                <td className="px-4 py-4 text-right"><Skeleton className="h-4 w-16 ml-auto" /></td>
+                <td className="px-4 py-4 text-right"><Skeleton className="h-4 w-32 ml-auto" /></td>
+                <td className="px-4 py-4 text-right"><Skeleton className="h-4 w-32 ml-auto" /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="mt-4 flex justify-between">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
         </div>
       </div>
     );
   }
 
-  if (!cryptos || cryptos.length === 0) {
-    return <div className="p-4 bg-galaxy-card-bg rounded-lg text-center">No cryptocurrency data available</div>;
-  }
-
   return (
-    <div className="w-full">
-      <div className="w-full overflow-x-auto rounded-lg border border-galaxy-secondary mb-4">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-galaxy-secondary bg-galaxy-card-bg">
-              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">#</th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">Price</th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground">24h %</th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground hidden sm:table-cell">Market Cap</th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground hidden md:table-cell">Volume (24h)</th>
-              <th className="px-4 py-3 text-right text-sm font-medium text-muted-foreground hidden lg:table-cell">Circulating Supply</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cryptos.map((crypto) => (
-              <tr 
-                key={crypto.id} 
-                className="border-b border-galaxy-secondary hover:bg-galaxy-secondary/20 transition-colors"
-              >
-                <td className="px-4 py-4 text-sm">{crypto.market_cap_rank}</td>
+    <div className="overflow-x-auto">
+      <div className="mb-4 relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input 
+          placeholder="Search cryptocurrencies..." 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 bg-galaxy-card-bg"
+        />
+      </div>
+      <table className="w-full table-auto">
+        <thead>
+          <tr className="border-b border-galaxy-secondary">
+            <th className="px-4 py-3 text-left"># Rank</th>
+            <th className="px-4 py-3 text-left">Name</th>
+            <th className="px-4 py-3 text-right">Price</th>
+            <th className="px-4 py-3 text-right">24h %</th>
+            <th className="px-4 py-3 text-right">Market Cap</th>
+            <th className="px-4 py-3 text-right">Volume (24h)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredCryptoList?.map((crypto) => {
+            const isPriceUp = crypto.price_change_percentage_24h >= 0;
+            
+            return (
+              <tr key={crypto.id} className="hover:bg-galaxy-card-bg/50 border-b border-galaxy-secondary/50">
+                <td className="px-4 py-4 text-muted-foreground">
+                  {crypto.market_cap_rank}
+                </td>
                 <td className="px-4 py-4">
-                  <Link to={`/crypto/${crypto.id}`} className="flex items-center gap-2 hover:text-galaxy-accent">
+                  <Link to={`/crypto/${crypto.id}`} className="flex items-center">
                     <img 
                       src={crypto.image} 
                       alt={crypto.name} 
-                      className="w-6 h-6" 
-                      loading="lazy" 
+                      className="w-8 h-8 rounded-full mr-2"
+                      loading="lazy"
                     />
-                    <span className="font-medium">{crypto.name}</span>
-                    <span className="text-xs text-muted-foreground uppercase">{crypto.symbol}</span>
+                    <div>
+                      <span className="font-medium">{crypto.name}</span>
+                      <span className="block text-xs text-muted-foreground uppercase">{crypto.symbol}</span>
+                    </div>
                   </Link>
                 </td>
-                <td className="px-4 py-4 text-right">{formatCurrency(crypto.current_price)}</td>
-                <td className="px-4 py-4 text-right">
-                  <span 
-                    className={crypto.price_change_percentage_24h >= 0 ? "price-up" : "price-down"}
-                  >
-                    {crypto.price_change_percentage_24h >= 0 ? (
-                      <ArrowUp className="inline h-3 w-3 mr-1" />
+                <td className="px-4 py-4 text-right font-medium">
+                  {formatPrice(crypto.current_price)}
+                </td>
+                <td className={`px-4 py-4 text-right ${isPriceUp ? 'text-galaxy-positive' : 'text-galaxy-negative'}`}>
+                  <div className="flex items-center justify-end">
+                    {isPriceUp ? (
+                      <ArrowUp className="h-4 w-4 mr-1" />
                     ) : (
-                      <ArrowDown className="inline h-3 w-3 mr-1" />
+                      <ArrowDown className="h-4 w-4 mr-1" />
                     )}
                     {formatPercent(Math.abs(crypto.price_change_percentage_24h))}
-                  </span>
+                  </div>
                 </td>
-                <td className="px-4 py-4 text-right hidden sm:table-cell">
-                  {formatLargeNumber(crypto.market_cap)}
+                <td className="px-4 py-4 text-right">
+                  {formatPrice(crypto.market_cap)}
                 </td>
-                <td className="px-4 py-4 text-right hidden md:table-cell">
-                  {formatLargeNumber(crypto.total_volume)}
-                </td>
-                <td className="px-4 py-4 text-right hidden lg:table-cell">
-                  {crypto.circulating_supply.toLocaleString()} {crypto.symbol.toUpperCase()}
+                <td className="px-4 py-4 text-right">
+                  {formatPrice(crypto.total_volume)}
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
+            );
+          })}
+        </tbody>
+      </table>
+      <div className="mt-4 flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={handlePrevPage} 
           disabled={page === 1}
-          onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-          className="border-galaxy-secondary text-sm hover:bg-galaxy-secondary"
+          className="border-galaxy-secondary"
         >
           Previous
         </Button>
-        <span className="flex items-center px-4">Page {page}</span>
-        <Button
-          variant="outline"
-          onClick={() => setPage((prev) => prev + 1)}
-          className="border-galaxy-secondary text-sm hover:bg-galaxy-secondary"
+        <Button 
+          variant="outline" 
+          onClick={handleNextPage}
+          className="border-galaxy-secondary"
         >
           Next
         </Button>

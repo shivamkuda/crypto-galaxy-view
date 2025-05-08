@@ -7,6 +7,7 @@ import WalletModal from '@/components/WalletModal';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCryptoList } from '@/utils/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 const mockPortfolio = [
   { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', amount: 0.0212, price: 0 },
@@ -15,6 +16,7 @@ const mockPortfolio = [
 
 const WalletPage = () => {
   const [walletBalance, setWalletBalance] = useState(1000);
+  const { formatPrice } = useCurrency();
   
   const { data: cryptoData, isLoading } = useQuery({
     queryKey: ['crypto-prices'],
@@ -48,7 +50,7 @@ const WalletPage = () => {
               <Wallet className="mr-2 h-5 w-5 text-galaxy-accent" />
               Available Balance
             </h2>
-            <p className="text-3xl font-bold mb-2">${walletBalance.toFixed(2)}</p>
+            <p className="text-3xl font-bold mb-2">{formatPrice(walletBalance)}</p>
             <div className="flex gap-2 mt-4">
               <Button className="bg-galaxy-accent text-galaxy-bg hover:bg-galaxy-accent/90">
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -59,7 +61,7 @@ const WalletPage = () => {
           
           <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <h2 className="text-xl font-semibold mb-4">Portfolio Value</h2>
-            <p className="text-3xl font-bold mb-2">${totalPortfolioValue.toFixed(2)}</p>
+            <p className="text-3xl font-bold mb-2">{formatPrice(totalPortfolioValue)}</p>
             <p className="text-sm text-muted-foreground">
               {isLoading ? 'Loading portfolio data...' : `${portfolio.length} assets in your portfolio`}
             </p>
@@ -104,7 +106,7 @@ const WalletPage = () => {
                         {asset.amount.toFixed(8)}
                       </td>
                       <td className="p-4 text-right">
-                        ${(asset.price * asset.amount).toFixed(2)}
+                        {formatPrice(asset.price * asset.amount)}
                       </td>
                       <td className="p-4 text-right">
                         <WalletModal 
@@ -151,7 +153,7 @@ const WalletPage = () => {
                       <img src={crypto.image} alt={crypto.name} className="w-6 h-6 mr-2" />
                       <span className="font-medium">{crypto.name}</span>
                     </div>
-                    <p className="text-lg font-bold mb-3">${crypto.current_price.toFixed(2)}</p>
+                    <p className="text-lg font-bold mb-3">{formatPrice(crypto.current_price)}</p>
                     <WalletModal 
                       cryptoId={crypto.id} 
                       cryptoName={crypto.name} 
