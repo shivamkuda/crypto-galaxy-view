@@ -3,8 +3,14 @@ import React, { useState } from 'react';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Wallet, CreditCard } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Wallet, CreditCard, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 interface WalletModalProps {
   cryptoId?: string;
@@ -12,27 +18,33 @@ interface WalletModalProps {
   currentPrice?: number;
 }
 
+const formSchema = z.object({
+  amount: z
+    .string()
+    .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
+      message: "Please enter a valid amount greater than 0",
+    }),
+  paymentMethod: z.enum(["credit_card", "bank_transfer", "crypto"])
+});
+
 const WalletModal: React.FC<WalletModalProps> = ({ 
   cryptoId, 
   cryptoName = 'Bitcoin',
   currentPrice = 50000
 }) => {
   const { toast } = useToast();
-  const [amount, setAmount] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [walletBalance, setWalletBalance] = useState(1000); // Mock wallet balance
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      amount: "",
+      paymentMethod: "credit_card"
+    },
+  });
 
-  const handlePurchase = () => {
-    if (!amount || parseFloat(amount) <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid purchase amount",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const purchaseAmount = parseFloat(amount);
+  const handlePurchase = (values: z.infer<typeof formSchema>) => {
+    const purchaseAmount = parseFloat(values.amount);
     
     if (purchaseAmount > walletBalance) {
       toast({
@@ -53,11 +65,20 @@ const WalletModal: React.FC<WalletModalProps> = ({
       setIsLoading(false);
       toast({
         title: "Purchase successful!",
-        description: `You purchased ${cryptoAmount.toFixed(8)} ${cryptoName}`,
+        description: `You purchased ${cryptoAmount.toFixed(8)} ${cryptoName} using ${getPaymentMethodName(values.paymentMethod)}`,
       });
       
-      setAmount('');
+      form.reset();
     }, 1500);
+  };
+
+  const getPaymentMethodName = (method: string) => {
+    switch (method) {
+      case "credit_card": return "Credit Card";
+      case "bank_transfer": return "Bank Transfer";
+      case "crypto": return "Crypto Wallet";
+      default: return "Unknown Method";
+    }
   };
 
   return (
@@ -75,37 +96,92 @@ const WalletModal: React.FC<WalletModalProps> = ({
             Current price: ${currentPrice.toFixed(2)} | Your balance: ${walletBalance.toFixed(2)}
           </DrawerDescription>
         </DrawerHeader>
-        <div className="p-4">
-          <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium">Amount to spend (USD)</label>
-            <Input
-              type="number"
-              placeholder="Enter USD amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="bg-galaxy-secondary/30"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handlePurchase)} className="p-4 space-y-4">
+            <FormField
+              control={form.control}
+              name="paymentMethod"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Payment Method</FormLabel>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                  >
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30">
+                      <FormControl>
+                        <RadioGroupItem value="credit_card" />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        Credit Card
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30">
+                      <FormControl>
+                        <RadioGroupItem value="bank_transfer" />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2">
+                        <DollarSign className="h-4 w-4" />
+                        Bank Transfer
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30">
+                      <FormControl>
+                        <RadioGroupItem value="crypto" />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2">
+                        <Wallet className="h-4 w-4" />
+                        Crypto Wallet
+                      </FormLabel>
+                    </FormItem>
+                  </RadioGroup>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {amount && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                You will receive approximately {parseFloat(amount) / currentPrice > 0 
-                  ? (parseFloat(amount) / currentPrice).toFixed(8) 
-                  : '0'} {cryptoName}
-              </p>
-            )}
-          </div>
-        </div>
-        <DrawerFooter>
-          <Button 
-            onClick={handlePurchase} 
-            disabled={isLoading}
-            className="bg-galaxy-accent text-galaxy-bg hover:bg-galaxy-accent/90"
-          >
-            {isLoading ? 'Processing...' : 'Confirm Purchase'}
-          </Button>
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
+          
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Amount to spend (USD)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter USD amount"
+                      className="bg-galaxy-secondary/30"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  {field.value && !isNaN(parseFloat(field.value)) && parseFloat(field.value) > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      You will receive approximately {parseFloat(field.value) / currentPrice > 0 
+                        ? (parseFloat(field.value) / currentPrice).toFixed(8) 
+                        : '0'} {cryptoName}
+                    </p>
+                  )}
+                </FormItem>
+              )}
+            />
+          
+            <DrawerFooter className="px-0 pb-0">
+              <Button 
+                type="submit"
+                disabled={isLoading}
+                className="bg-galaxy-accent text-galaxy-bg hover:bg-galaxy-accent/90"
+              >
+                {isLoading ? 'Processing...' : 'Confirm Purchase'}
+              </Button>
+              <DrawerClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </form>
+        </Form>
       </DrawerContent>
     </Drawer>
   );
