@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Wallet, CreditCard, DollarSign } from 'lucide-react';
+import { Wallet, CreditCard, DollarSign, Banknote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +24,7 @@ const formSchema = z.object({
     .refine((val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0, {
       message: "Please enter a valid amount greater than 0",
     }),
-  paymentMethod: z.enum(["credit_card", "bank_transfer", "crypto"])
+  paymentMethod: z.enum(["credit_card", "bank_transfer", "crypto", "wallet"])
 });
 
 const WalletModal: React.FC<WalletModalProps> = ({ 
@@ -77,6 +77,7 @@ const WalletModal: React.FC<WalletModalProps> = ({
       case "credit_card": return "Credit Card";
       case "bank_transfer": return "Bank Transfer";
       case "crypto": return "Crypto Wallet";
+      case "wallet": return "CryptoGalaxy Wallet";
       default: return "Unknown Method";
     }
   };
@@ -107,33 +108,54 @@ const WalletModal: React.FC<WalletModalProps> = ({
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
                   >
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30">
+                    <FormItem className={cn(
+                      "flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30 transition-all",
+                      field.value === "credit_card" && "bg-galaxy-secondary/40 border-galaxy-accent"
+                    )}>
                       <FormControl>
                         <RadioGroupItem value="credit_card" />
                       </FormControl>
-                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2">
-                        <CreditCard className="h-4 w-4" />
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 w-full">
+                        <CreditCard className="h-5 w-5" />
                         Credit Card
                       </FormLabel>
                     </FormItem>
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30">
+                    <FormItem className={cn(
+                      "flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30 transition-all",
+                      field.value === "bank_transfer" && "bg-galaxy-secondary/40 border-galaxy-accent"
+                    )}>
                       <FormControl>
                         <RadioGroupItem value="bank_transfer" />
                       </FormControl>
-                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 w-full">
+                        <DollarSign className="h-5 w-5" />
                         Bank Transfer
                       </FormLabel>
                     </FormItem>
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30">
+                    <FormItem className={cn(
+                      "flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30 transition-all",
+                      field.value === "crypto" && "bg-galaxy-secondary/40 border-galaxy-accent"
+                    )}>
                       <FormControl>
                         <RadioGroupItem value="crypto" />
                       </FormControl>
-                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2">
-                        <Wallet className="h-4 w-4" />
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 w-full">
+                        <Wallet className="h-5 w-5" />
                         Crypto Wallet
+                      </FormLabel>
+                    </FormItem>
+                    <FormItem className={cn(
+                      "flex flex-row items-center space-x-2 space-y-0 rounded-md border p-4 cursor-pointer hover:bg-galaxy-secondary/30 transition-all",
+                      field.value === "wallet" && "bg-galaxy-secondary/40 border-galaxy-accent"
+                    )}>
+                      <FormControl>
+                        <RadioGroupItem value="wallet" />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer flex items-center gap-2 w-full">
+                        <Banknote className="h-5 w-5" />
+                        CryptoGalaxy Wallet
                       </FormLabel>
                     </FormItem>
                   </RadioGroup>
