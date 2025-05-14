@@ -93,25 +93,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = async (): Promise<boolean> => {
-    // Simulate Google authentication
+    // Since we can't integrate with the actual Google OAuth API in this mock environment,
+    // we'll simulate a more realistic Google login flow
     setIsLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Mock Google login - in real app would validate with Google OAuth
-        const googleUser = {
-          id: `google-user-${Date.now()}`,
-          email: `user${Math.floor(Math.random() * 10000)}@gmail.com`,
-          username: `GoogleUser${Math.floor(Math.random() * 10000)}`,
-          provider: 'google',
-          photoUrl: 'https://picsum.photos/200' // Placeholder for avatar
-        };
-        
-        setUser(googleUser);
-        localStorage.setItem('user', JSON.stringify(googleUser));
-        setIsLoading(false);
-        resolve(true);
-      }, 800);
-    });
+    
+    try {
+      // This would be where we'd trigger the Google OAuth popup
+      console.log("Opening Google authentication window...");
+      
+      // Mock a successful Google authentication response
+      // In a real implementation, we would get this data from Google's OAuth response
+      return new Promise((resolve) => {
+        // Simulating the OAuth popup and waiting for user interaction
+        setTimeout(() => {
+          // Get user's email input to simulate actual account connection
+          const userEmail = prompt("Enter your Google email to simulate connection:", "yourname@gmail.com");
+          
+          if (userEmail && userEmail.includes('@')) {
+            // Extract username from email for display
+            const username = userEmail.split('@')[0];
+            const googleUserId = `google-${Date.now()}`;
+            
+            // Create user object with accurate information
+            const googleUser = {
+              id: googleUserId,
+              email: userEmail,
+              username: username,
+              provider: 'google',
+              photoUrl: `https://ui-avatars.com/api/?name=${username}&background=random&color=fff` // Generate avatar based on name
+            };
+            
+            setUser(googleUser);
+            localStorage.setItem('user', JSON.stringify(googleUser));
+            setIsLoading(false);
+            resolve(true);
+          } else {
+            console.log("Google authentication canceled or invalid email");
+            setIsLoading(false);
+            resolve(false);
+          }
+        }, 1000);
+      });
+    } catch (error) {
+      console.error("Google authentication error:", error);
+      setIsLoading(false);
+      return false;
+    }
   };
 
   const logout = () => {
