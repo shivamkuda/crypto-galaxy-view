@@ -66,16 +66,16 @@ const Login: React.FC = () => {
         </Button>
       </div>
       
-      <Link to="/" className="flex items-center mb-8 space-x-2">
-        <Wallet className="w-8 h-8 text-galaxy-accent" />
-        <span className="text-xl font-bold bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
+      <Link to="/" className="flex items-center mb-6 md:mb-8 space-x-2">
+        <Wallet className="w-6 h-6 md:w-8 md:h-8 text-galaxy-accent" />
+        <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
           CryptoGalaxyView
         </span>
       </Link>
 
       <Card className="w-full max-w-md bg-galaxy-card-bg border-galaxy-secondary">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Login</CardTitle>
+          <CardTitle className="text-xl md:text-2xl font-bold text-center">Login</CardTitle>
           <CardDescription className="text-center">
             Enter your email and password to access your account
           </CardDescription>
@@ -95,9 +95,9 @@ const Login: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1">
                 <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-sm text-galaxy-accent hover:underline">
+                <Link to="/forgot-password" className="text-xs xs:text-sm text-galaxy-accent hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -122,7 +122,7 @@ const Login: React.FC = () => {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs md:text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link to="/signup" className="text-galaxy-accent hover:underline">
               Sign up

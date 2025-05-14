@@ -11,7 +11,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent animate-slide-up">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent animate-slide-up">
           Cryptocurrency Market
         </h1>
         
@@ -19,8 +19,10 @@ const Index = () => {
         <TrendingSection />
         
         <div className="mb-6 animate-slide-up">
-          <h2 className="text-xl font-bold mb-4">Top Cryptocurrencies</h2>
-          <CryptoTable />
+          <h2 className="text-lg md:text-xl font-bold mb-4">Top Cryptocurrencies</h2>
+          <div className="overflow-x-auto">
+            <CryptoTable />
+          </div>
         </div>
       </main>
       <footer className="py-6 bg-galaxy-secondary mt-auto">

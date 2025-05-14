@@ -16,23 +16,23 @@ const TrendingSection: React.FC = () => {
   if (isLoading) {
     return (
       <div className="mb-8">
-        <h2 className="text-xl font-bold mb-4 flex items-center">
+        <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center">
           <TrendingUp className="h-5 w-5 mr-2 text-galaxy-accent" />
           Trending Cryptocurrencies
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 animate-pulse">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="crypto-card p-4">
               <div className="flex items-center gap-3 mb-3">
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-8 w-8 sm:h-10 sm:w-10 rounded-full" />
                 <div>
-                  <Skeleton className="h-5 w-24 mb-1" />
-                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-4 w-16 sm:w-24 mb-1" />
+                  <Skeleton className="h-3 w-12 sm:w-16" />
                 </div>
               </div>
               <div className="flex justify-between items-center mt-2">
                 <Skeleton className="h-3 w-12" />
-                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
               </div>
             </div>
           ))}
@@ -50,11 +50,11 @@ const TrendingSection: React.FC = () => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4 flex items-center">
+      <h2 className="text-lg md:text-xl font-bold mb-4 flex items-center">
         <TrendingUp className="h-5 w-5 mr-2 text-galaxy-accent" />
         Trending Cryptocurrencies
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {trendingCoins.map((trending, index) => (
           <CryptoCard key={trending.item.id} trending={trending} trendingRank={index} />
         ))}

@@ -19,6 +19,9 @@ export default {
       },
     },
     extend: {
+      screens: {
+        'xs': '480px',
+      },
       colors: {
         // Galaxy theme colors
         galaxy: {
