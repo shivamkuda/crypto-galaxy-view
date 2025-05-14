@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import GlobalStats from '@/components/GlobalStats';
 import CryptoTable from '@/components/CryptoTable';
 import TrendingSection from '@/components/TrendingSection';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const Index = () => {
   return (
