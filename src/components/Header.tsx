@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2, Menu, X } from 'lucide-react';
+import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import CurrencyToggle from './CurrencyToggle';
@@ -12,13 +12,13 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Header: React.FC = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
@@ -70,14 +70,21 @@ const Header: React.FC = () => {
               <span className="text-sm hidden md:inline-block">
                 {user?.email}
               </span>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-galaxy-accent"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
+              {user.photoUrl ? (
+                <Avatar className="h-8 w-8 border border-galaxy-accent">
+                  <AvatarImage src={user.photoUrl} alt={user.username} />
+                  <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+              ) : (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-galaxy-accent"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              )}
             </div>
           </li>
         </>

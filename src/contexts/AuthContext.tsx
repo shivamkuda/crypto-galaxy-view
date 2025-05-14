@@ -5,6 +5,8 @@ interface User {
   id: string;
   email: string;
   username: string;
+  provider?: string;
+  photoUrl?: string;
 }
 
 interface AuthContextType {
@@ -12,6 +14,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, username: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   logout: () => void;
 }
 
@@ -50,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: `user-${Date.now()}`,
             email,
             username: email.split('@')[0],
+            provider: 'email'
           };
           setUser(newUser);
           localStorage.setItem('user', JSON.stringify(newUser));
@@ -74,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: `user-${Date.now()}`,
             email,
             username,
+            provider: 'email'
           };
           setUser(newUser);
           localStorage.setItem('user', JSON.stringify(newUser));
@@ -87,13 +92,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const loginWithGoogle = async (): Promise<boolean> => {
+    // Simulate Google authentication
+    setIsLoading(true);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Mock Google login - in real app would validate with Google OAuth
+        const googleUser = {
+          id: `google-user-${Date.now()}`,
+          email: `user${Math.floor(Math.random() * 10000)}@gmail.com`,
+          username: `GoogleUser${Math.floor(Math.random() * 10000)}`,
+          provider: 'google',
+          photoUrl: 'https://picsum.photos/200' // Placeholder for avatar
+        };
+        
+        setUser(googleUser);
+        localStorage.setItem('user', JSON.stringify(googleUser));
+        setIsLoading(false);
+        resolve(true);
+      }, 800);
+    });
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, signup, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
