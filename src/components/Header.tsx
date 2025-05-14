@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2, Menu } from 'lucide-react';
+import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2, Menu, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import CurrencyToggle from './CurrencyToggle';
@@ -13,9 +13,18 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -26,6 +35,7 @@ const Header: React.FC = () => {
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
+    navigate('/');
   };
 
   const NavLinks = () => (
@@ -66,26 +76,44 @@ const Header: React.FC = () => {
             </Button>
           </li>
           <li className="ml-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm hidden md:inline-block">
-                {user?.email}
-              </span>
-              {user.photoUrl ? (
-                <Avatar className="h-8 w-8 border border-galaxy-accent">
-                  <AvatarImage src={user.photoUrl} alt={user.username} />
-                  <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              ) : (
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-galaxy-accent"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-5 w-5" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  {user.photoUrl ? (
+                    <Avatar className="h-9 w-9 border border-galaxy-accent">
+                      <AvatarImage src={user.photoUrl} alt={user.username} />
+                      <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="bg-galaxy-accent text-white">
+                        {user.username.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                 </Button>
-              )}
-            </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.username}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                    {user.id && (
+                      <p className="text-xs leading-none text-muted-foreground mt-1">
+                        ID: {user.id}
+                      </p>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         </>
       ) : (
