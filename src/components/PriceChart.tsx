@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCryptoChart } from '@/utils/api';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -14,6 +14,9 @@ interface PriceChartProps {
 const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   const [timeRange, setTimeRange] = useState<number>(7); // Default to 7 days
   const [retryCount, setRetryCount] = useState(0);
+  const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [prevPrice, setPrevPrice] = useState<number | null>(null);
+  const [priceChange, setPriceChange] = useState<number>(0);
   
   const { data: chartData, isLoading, error, refetch } = useQuery({
     queryKey: ['chart', cryptoId, timeRange, retryCount],
@@ -22,6 +25,43 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Add a separate query for real-time price data (shorter interval)
+  const { data: realtimeData } = useQuery({
+    queryKey: ['realtimePrice', cryptoId],
+    queryFn: () => fetchCryptoChart(cryptoId, 1, true), // Pass true to indicate we just need latest price
+    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 15000, // Consider fresh for 15 seconds
+    onSuccess: (data) => {
+      if (data?.prices?.length > 0) {
+        // Get most recent price
+        const latestPrice = data.prices[data.prices.length - 1][1];
+        
+        // Save previous price to calculate change
+        if (currentPrice !== null && currentPrice !== latestPrice) {
+          setPrevPrice(currentPrice);
+        }
+        
+        // Update current price
+        setCurrentPrice(latestPrice);
+      }
+    },
+  });
+  
+  // Calculate price change whenever price updates
+  useEffect(() => {
+    if (currentPrice !== null && prevPrice !== null) {
+      const change = currentPrice - prevPrice;
+      setPriceChange(change);
+      
+      // Reset change indicator after 2 seconds
+      const timer = setTimeout(() => {
+        setPriceChange(0);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentPrice, prevPrice]);
   
   // Function to handle retry when chart fails to load
   const handleRetry = () => {
@@ -76,12 +116,35 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   }));
   
   // Determine if price has increased over the period
-  const priceChange = data[data.length - 1].price - data[0].price;
-  const isPriceUp = priceChange >= 0;
+  const periodPriceChange = data[data.length - 1].price - data[0].price;
+  const isPriceUp = periodPriceChange >= 0;
   const lineColor = isPriceUp ? '#4CC9F0' : '#F72585';
+  
+  // Determine if current real-time price is up or down
+  const priceChangeColor = priceChange > 0 
+    ? 'text-galaxy-positive' 
+    : priceChange < 0 
+      ? 'text-galaxy-negative' 
+      : '';
   
   return (
     <div className="w-full">
+      {/* Price display with live indicator */}
+      {currentPrice && (
+        <div className={`mb-4 flex items-center ${priceChangeColor} transition-colors duration-300`}>
+          <span className="text-xl font-bold mr-2">${currentPrice.toFixed(2)}</span>
+          {priceChange !== 0 && (
+            <span className="text-sm font-medium">
+              {priceChange > 0 ? '+' : ''}{priceChange.toFixed(2)}
+            </span>
+          )}
+          <span className="ml-2 relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-galaxy-accent opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-galaxy-accent"></span>
+          </span>
+        </div>
+      )}
+      
       <div className="flex flex-wrap justify-end mb-4 gap-2">
         {[
           { days: 1, label: '1D' }, 

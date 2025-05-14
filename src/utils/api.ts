@@ -84,7 +84,8 @@ export const fetchCryptoDetails = async (id: string): Promise<any | null> => {
 
 export const fetchCryptoChart = async (
   id: string, 
-  days: number = 7
+  days: number = 7,
+  realtimeOnly: boolean = false
 ): Promise<ChartData | null> => {
   try {
     // Implement more advanced error handling with exponential backoff
@@ -96,8 +97,12 @@ export const fetchCryptoChart = async (
       try {
         // Add a cache-busting parameter to avoid potential caching issues
         const cacheBuster = `_cb=${Date.now()}`;
+        
+        // If we only need real-time price, use a shorter interval to reduce data payload
+        const intervalParam = realtimeOnly ? '&interval=5m' : '';
+        
         response = await fetch(
-          `${API_BASE_URL}/coins/${id}/market_chart?vs_currency=usd&days=${days}&${cacheBuster}`
+          `${API_BASE_URL}/coins/${id}/market_chart?vs_currency=usd&days=${days}${intervalParam}&${cacheBuster}`
         );
         
         if (response.ok) break;
@@ -123,7 +128,7 @@ export const fetchCryptoChart = async (
         // This helps avoid showing the error state in demos and development
         if (process.env.NODE_ENV !== 'production') {
           console.log('Generating mock chart data for development');
-          return generateMockChartData(days);
+          return generateMockChartData(days, realtimeOnly);
         }
         throw new Error(`Failed to fetch chart data after multiple retries`);
       }
@@ -134,7 +139,13 @@ export const fetchCryptoChart = async (
     }
     
     const data = await response.json();
-    console.log(`Chart data for ${id} (${days} days) loaded successfully: ${data.prices.length} points`);
+    
+    if (realtimeOnly) {
+      console.log(`Real-time price for ${id} loaded: $${data.prices[data.prices.length - 1][1]}`);
+    } else {
+      console.log(`Chart data for ${id} (${days} days) loaded successfully: ${data.prices.length} points`);
+    }
+    
     return data;
   } catch (error) {
     console.error(`Failed to fetch chart data for ${id}:`, error);
@@ -142,7 +153,7 @@ export const fetchCryptoChart = async (
     // For demo/development purposes, return mock data instead of null
     if (process.env.NODE_ENV !== 'production') {
       console.log('Falling back to mock chart data for development');
-      return generateMockChartData(days);
+      return generateMockChartData(days, realtimeOnly);
     }
     return null;
   }
@@ -150,7 +161,7 @@ export const fetchCryptoChart = async (
 
 // Helper function to generate mock chart data when API fails
 // This is useful for development and demonstration purposes
-function generateMockChartData(days: number): ChartData {
+function generateMockChartData(days: number, realtimeOnly: boolean = false): ChartData {
   const now = Date.now();
   const prices: [number, number][] = [];
   const marketCaps: [number, number][] = [];
@@ -158,16 +169,19 @@ function generateMockChartData(days: number): ChartData {
   
   // Generate realistic-looking price data
   let price = 30000 + Math.random() * 5000; // Starting price around $30k
-  const volatility = 0.02;
+  const volatility = realtimeOnly ? 0.005 : 0.02; // Lower volatility for real-time data
   const trend = 0.001;
-  const pointsToGenerate = days * 24; // Hourly data points
+  
+  // For real-time data, generate fewer points with more recent timestamps
+  const pointsToGenerate = realtimeOnly ? 12 : days * 24; // 12 points for real-time, hourly data for historical
+  const timeStep = realtimeOnly ? (60 * 60 * 1000 / 12) : (24 * 60 * 60 * 1000 / pointsToGenerate);
   
   for (let i = 0; i < pointsToGenerate; i++) {
     // Random walk with slight upward trend
     const change = (Math.random() - 0.5) * volatility + trend;
     price = Math.max(100, price * (1 + change));
     
-    const timestamp = now - (pointsToGenerate - i) * (24 * 60 * 60 * 1000 / pointsToGenerate);
+    const timestamp = now - (pointsToGenerate - i) * timeStep;
     prices.push([timestamp, price]);
     
     // Generate realistic market cap and volume data

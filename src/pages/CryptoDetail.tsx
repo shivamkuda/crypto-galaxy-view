@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +17,7 @@ const CryptoDetail = () => {
   const { data: crypto, isLoading } = useQuery({
     queryKey: ['crypto', id],
     queryFn: () => fetchCryptoDetails(id),
-    refetchInterval: 30000, // refetch every 30 seconds
+    refetchInterval: 30000, // refetch every 30 seconds for live data
     enabled: !!id,
   });
 
@@ -112,21 +111,7 @@ const CryptoDetail = () => {
                 </span>
               )}
             </h1>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold mr-2">
-                {formatPrice(crypto.market_data?.current_price?.usd)}
-              </span>
-              {priceChangePercent24h !== undefined && (
-                <span className={isPriceUp ? "price-up" : "price-down"}>
-                  {isPriceUp ? (
-                    <ArrowUp className="inline h-4 w-4 mr-1" />
-                  ) : (
-                    <ArrowDown className="inline h-4 w-4 mr-1" />
-                  )}
-                  {formatPercent(Math.abs(priceChangePercent24h))}
-                </span>
-              )}
-            </div>
+            {/* The price display is now in the PriceChart component for real-time updates */}
           </div>
           <div>
             <WalletModal 
