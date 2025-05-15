@@ -32,21 +32,23 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
     queryFn: () => fetchCryptoChart(cryptoId, 1, true), // Pass true to indicate we just need latest price
     refetchInterval: 30000, // Refetch every 30 seconds
     staleTime: 15000, // Consider fresh for 15 seconds
-    onSuccess: (data) => {
-      if (data?.prices?.length > 0) {
-        // Get most recent price
-        const latestPrice = data.prices[data.prices.length - 1][1];
-        
-        // Save previous price to calculate change
-        if (currentPrice !== null && currentPrice !== latestPrice) {
-          setPrevPrice(currentPrice);
-        }
-        
-        // Update current price
-        setCurrentPrice(latestPrice);
-      }
-    },
   });
+  
+  // Update current price when realtime data changes
+  useEffect(() => {
+    if (realtimeData?.prices?.length > 0) {
+      // Get most recent price
+      const latestPrice = realtimeData.prices[realtimeData.prices.length - 1][1];
+      
+      // Save previous price to calculate change
+      if (currentPrice !== null && currentPrice !== latestPrice) {
+        setPrevPrice(currentPrice);
+      }
+      
+      // Update current price
+      setCurrentPrice(latestPrice);
+    }
+  }, [realtimeData, currentPrice]);
   
   // Calculate price change whenever price updates
   useEffect(() => {
