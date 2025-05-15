@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCryptoChart } from '@/utils/api';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +10,13 @@ interface PriceChartProps {
   cryptoId: string;
 }
 
+// Direct API interfaces for CoinGecko
+interface ChartData {
+  prices: [number, number][];
+  market_caps: [number, number][];
+  total_volumes: [number, number][];
+}
+
 const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   const [timeRange, setTimeRange] = useState<number>(7); // Default to 7 days
   const [retryCount, setRetryCount] = useState(0);
@@ -18,37 +24,64 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   const [prevPrice, setPrevPrice] = useState<number | null>(null);
   const [priceChange, setPriceChange] = useState<number>(0);
   
+  // Fetch chart data directly from CoinGecko
+  const fetchCoinGeckoChart = async (id: string, days: number): Promise<ChartData> => {
+    // Add cache busting to avoid rate limiting issues
+    const cacheBuster = `_cb=${Date.now()}`;
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}&${cacheBuster}`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`CoinGecko API Error: ${response.status}`);
+    }
+    
+    return await response.json();
+  };
+  
+  // Fetch current price directly from CoinGecko
+  const fetchCurrentPrice = async (id: string): Promise<number> => {
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`
+    );
+    
+    if (!response.ok) {
+      throw new Error(`CoinGecko API Error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data[id]?.usd || 0;
+  };
+  
+  // Query for historical chart data
   const { data: chartData, isLoading, error, refetch } = useQuery({
     queryKey: ['chart', cryptoId, timeRange, retryCount],
-    queryFn: () => fetchCryptoChart(cryptoId, timeRange),
-    refetchInterval: timeRange === 1 ? 60000 : false, // Refetch every minute for 1-day charts
+    queryFn: () => fetchCoinGeckoChart(cryptoId, timeRange),
+    refetchInterval: false,
     retry: 2,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Add a separate query for real-time price data (shorter interval)
-  const { data: realtimeData } = useQuery({
+  // Query for real-time price data (shorter interval)
+  const { data: realtimePrice } = useQuery({
     queryKey: ['realtimePrice', cryptoId],
-    queryFn: () => fetchCryptoChart(cryptoId, 1, true), // Pass true to indicate we just need latest price
+    queryFn: () => fetchCurrentPrice(cryptoId),
     refetchInterval: 30000, // Refetch every 30 seconds
     staleTime: 15000, // Consider fresh for 15 seconds
   });
   
   // Update current price when realtime data changes
   useEffect(() => {
-    if (realtimeData?.prices?.length > 0) {
-      // Get most recent price
-      const latestPrice = realtimeData.prices[realtimeData.prices.length - 1][1];
-      
+    if (realtimePrice) {
       // Save previous price to calculate change
-      if (currentPrice !== null && currentPrice !== latestPrice) {
+      if (currentPrice !== null && currentPrice !== realtimePrice) {
         setPrevPrice(currentPrice);
       }
       
       // Update current price
-      setCurrentPrice(latestPrice);
+      setCurrentPrice(realtimePrice);
     }
-  }, [realtimeData, currentPrice]);
+  }, [realtimePrice, currentPrice]);
   
   // Calculate price change whenever price updates
   useEffect(() => {
