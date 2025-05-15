@@ -50,7 +50,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
     }
     
     const data = await response.json();
-    return data[id]?.usd || 0;
+    // Ensure we're returning a number and not undefined or other types
+    const price = data[id]?.usd;
+    return typeof price === 'number' ? price : 0;
   };
   
   // Query for historical chart data
@@ -72,7 +74,7 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   
   // Update current price when realtime data changes
   useEffect(() => {
-    if (realtimePrice) {
+    if (realtimePrice !== undefined && typeof realtimePrice === 'number') {
       // Save previous price to calculate change
       if (currentPrice !== null && currentPrice !== realtimePrice) {
         setPrevPrice(currentPrice);
@@ -165,9 +167,9 @@ const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   return (
     <div className="w-full">
       {/* Price display with live indicator */}
-      {currentPrice && (
+      {currentPrice !== null && (
         <div className={`mb-4 flex items-center ${priceChangeColor} transition-colors duration-300`}>
-          <span className="text-xl font-bold mr-2">${currentPrice.toFixed(2)}</span>
+          <span className="text-xl font-bold mr-2">${typeof currentPrice === 'number' ? currentPrice.toFixed(2) : '0.00'}</span>
           {priceChange !== 0 && (
             <span className="text-sm font-medium">
               {priceChange > 0 ? '+' : ''}{priceChange.toFixed(2)}
