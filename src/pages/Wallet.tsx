@@ -18,9 +18,10 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { PortfolioItem } from '@/types/crypto';
 
 // Extending the mock portfolio with more data
-const initialPortfolio = [
+const initialPortfolio: PortfolioItem[] = [
   { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', amount: 0.0212, price: 0, purchasePrice: 35000 },
   { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', amount: 0.451, price: 0, purchasePrice: 2200 },
   { id: 'solana', name: 'Solana', symbol: 'SOL', amount: 2.5, price: 0, purchasePrice: 98 }
@@ -28,7 +29,7 @@ const initialPortfolio = [
 
 const WalletPage = () => {
   const [walletBalance, setWalletBalance] = useState(1000);
-  const [portfolio, setPortfolio] = useState(initialPortfolio);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>(initialPortfolio);
   const [sortConfig, setSortConfig] = useState({ key: 'value', direction: 'desc' });
   const { formatPrice } = useCurrency();
   
@@ -91,7 +92,7 @@ const WalletPage = () => {
       setPortfolio(updatedPortfolio);
     } else {
       // Add new crypto
-      const newCrypto = {
+      const newCrypto: PortfolioItem = {
         id: cryptoId,
         name: crypto.name,
         symbol: crypto.symbol.toUpperCase(),

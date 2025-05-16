@@ -69,3 +69,16 @@ export interface TrendingResponse {
   nfts: any[];
   categories: any[];
 }
+
+// New interface for portfolio items
+export interface PortfolioItem {
+  id: string;
+  name: string;
+  symbol: string;
+  amount: number;
+  price: number;
+  purchasePrice: number;
+  value?: number;
+  pnl?: number;
+  pnlPercentage?: number;
+}
