@@ -18,12 +18,12 @@ const PriceDisplay: React.FC<PriceDisplayProps> = ({
   if (currentPrice === null) return null;
 
   return (
-    <div className="mb-4 flex items-center space-x-2">
-      <span className="text-2xl font-bold text-white">
+    <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-1 sm:gap-2">
+      <span className="text-xl sm:text-2xl font-bold text-white break-all">
         {typeof currentPrice === 'number' ? formatPrice(currentPrice) : 'N/A'}
       </span>
       {priceChange !== 0 && (
-        <span className={`${priceChangeColor} text-sm font-medium px-1.5 py-0.5 rounded bg-opacity-20 ${priceChangeColor === 'text-galaxy-positive' ? 'bg-galaxy-positive/10' : 'bg-galaxy-negative/10'}`}>
+        <span className={`${priceChangeColor} text-xs sm:text-sm font-medium px-1.5 py-0.5 rounded bg-opacity-20 ${priceChangeColor === 'text-galaxy-positive' ? 'bg-galaxy-positive/10' : 'bg-galaxy-negative/10'}`}>
           {priceChange > 0 ? '+' : ''}{priceChange.toFixed(2)}%
         </span>
       )}
