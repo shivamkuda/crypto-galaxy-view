@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +10,7 @@ import { Wallet, LogIn, ArrowLeft, Github } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,6 +21,7 @@ const Login: React.FC = () => {
   const { login, loginWithGoogle, loginWithGitHub } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,12 +122,13 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-galaxy-bg p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-galaxy-bg p-4 sm:p-6">
       <div className="w-full max-w-md mb-4">
         <Button 
           variant="ghost" 
           onClick={handleGoBack}
           className="flex items-center text-galaxy-accent hover:text-galaxy-accent/90"
+          size={isMobile ? "sm" : "default"}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
@@ -140,24 +142,24 @@ const Login: React.FC = () => {
         </span>
       </Link>
 
-      <Card className="w-full max-w-md bg-galaxy-card-bg border-galaxy-secondary">
-        <CardHeader className="space-y-1">
+      <Card className="w-full max-w-md bg-galaxy-card-bg border-galaxy-secondary shadow-lg">
+        <CardHeader className="space-y-1 px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-xl md:text-2xl font-bold text-center">Login</CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-sm sm:text-base">
             Enter your email and password to access your account
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert className="bg-galaxy-accent/10 border-galaxy-accent/20">
+        <CardContent className="space-y-4 px-4 sm:px-6">
+          <Alert className="bg-galaxy-accent/10 border-galaxy-accent/20 py-2 sm:py-3">
             <Shield className="h-4 w-4 text-galaxy-accent" />
-            <AlertDescription className="text-xs text-galaxy-accent">
+            <AlertDescription className="text-xs sm:text-sm text-galaxy-accent">
               Your login is protected with industry-standard security protocols
             </AlertDescription>
           </Alert>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -165,13 +167,13 @@ const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-galaxy-bg border-galaxy-secondary"
+                className="bg-galaxy-bg border-galaxy-secondary h-9 sm:h-10"
               />
             </div>
             <div className="space-y-2">
               <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-1">
-                <Label htmlFor="password">Password</Label>
-                <Link to="/forgot-password" className="text-xs xs:text-sm text-galaxy-accent hover:underline">
+                <Label htmlFor="password" className="text-sm sm:text-base">Password</Label>
+                <Link to="/forgot-password" className="text-xs sm:text-sm text-galaxy-accent hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -182,12 +184,12 @@ const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-galaxy-bg border-galaxy-secondary"
+                className="bg-galaxy-bg border-galaxy-secondary h-9 sm:h-10"
               />
             </div>
             <Button
               type="submit"
-              className="w-full bg-galaxy-accent hover:bg-galaxy-accent/90 text-galaxy-bg"
+              className="w-full bg-galaxy-accent hover:bg-galaxy-accent/90 text-galaxy-bg h-9 sm:h-10"
               disabled={isSubmitting}
             >
               <LogIn className="mr-2 h-4 w-4" />
@@ -210,7 +212,7 @@ const Login: React.FC = () => {
             <Button 
               type="button" 
               variant="outline" 
-              className="w-full border-galaxy-secondary" 
+              className="w-full border-galaxy-secondary h-9 sm:h-10" 
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
             >
@@ -233,22 +235,26 @@ const Login: React.FC = () => {
                 />
                 <path d="M1 1h22v22H1z" fill="none" />
               </svg>
-              {isGoogleLoading ? "Connecting..." : "Continue with Google"}
+              <span className="text-xs sm:text-sm">
+                {isGoogleLoading ? "Connecting..." : "Continue with Google"}
+              </span>
             </Button>
             
             <Button 
               type="button" 
               variant="outline" 
-              className="w-full border-galaxy-secondary" 
+              className="w-full border-galaxy-secondary h-9 sm:h-10" 
               onClick={handleGitHubLogin}
               disabled={isGitHubLoading}
             >
               <Github className="mr-2 h-4 w-4" />
-              {isGitHubLoading ? "Connecting..." : "Continue with GitHub"}
+              <span className="text-xs sm:text-sm">
+                {isGitHubLoading ? "Connecting..." : "Continue with GitHub"}
+              </span>
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center px-4 sm:px-6 pb-4 sm:pb-6">
           <p className="text-xs md:text-sm text-muted-foreground">
             Don't have an account?{' '}
             <Link to="/signup" className="text-galaxy-accent hover:underline">
