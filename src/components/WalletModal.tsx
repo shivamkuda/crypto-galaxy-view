@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
@@ -11,11 +12,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface WalletModalProps {
   cryptoId?: string;
   cryptoName?: string;
   currentPrice?: number;
+  onPurchaseComplete?: (cryptoId: string, amount: number, price: number) => void;
 }
 
 const formSchema = z.object({
@@ -30,24 +33,26 @@ const formSchema = z.object({
 const WalletModal: React.FC<WalletModalProps> = ({ 
   cryptoId, 
   cryptoName = 'Bitcoin',
-  currentPrice = 50000
+  currentPrice = 50000,
+  onPurchaseComplete
 }) => {
-  const { toast } = useToast();
+  const { toast: useToastFn } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [walletBalance, setWalletBalance] = useState(1000); // Mock wallet balance
+  const [open, setOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: "",
-      paymentMethod: "credit_card"
+      paymentMethod: "wallet"
     },
   });
 
   const handlePurchase = (values: z.infer<typeof formSchema>) => {
     const purchaseAmount = parseFloat(values.amount);
     
-    if (purchaseAmount > walletBalance) {
-      toast({
+    if (values.paymentMethod === "wallet" && purchaseAmount > walletBalance) {
+      useToastFn({
         title: "Insufficient funds",
         description: "Your wallet balance is too low for this purchase",
         variant: "destructive"
@@ -60,15 +65,24 @@ const WalletModal: React.FC<WalletModalProps> = ({
     // Simulate API call
     setTimeout(() => {
       const cryptoAmount = purchaseAmount / currentPrice;
-      setWalletBalance(prev => prev - purchaseAmount);
+      
+      if (values.paymentMethod === "wallet") {
+        setWalletBalance(prev => prev - purchaseAmount);
+      }
       
       setIsLoading(false);
-      toast({
-        title: "Purchase successful!",
-        description: `You purchased ${cryptoAmount.toFixed(8)} ${cryptoName} using ${getPaymentMethodName(values.paymentMethod)}`,
+      
+      // Call the onPurchaseComplete callback if provided
+      if (onPurchaseComplete && cryptoId) {
+        onPurchaseComplete(cryptoId, purchaseAmount, currentPrice);
+      }
+      
+      toast.success(`You purchased ${cryptoAmount.toFixed(8)} ${cryptoName} using ${getPaymentMethodName(values.paymentMethod)}`, {
+        description: `Transaction completed successfully!`,
       });
       
       form.reset();
+      setOpen(false);
     }, 1500);
   };
 
@@ -83,7 +97,7 @@ const WalletModal: React.FC<WalletModalProps> = ({
   };
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" className="border-galaxy-accent text-galaxy-accent hover:bg-galaxy-accent hover:text-galaxy-bg">
           <Wallet className="mr-2 h-4 w-4" />
@@ -199,7 +213,7 @@ const WalletModal: React.FC<WalletModalProps> = ({
                 {isLoading ? 'Processing...' : 'Confirm Purchase'}
               </Button>
               <DrawerClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline" onClick={() => form.reset()}>Cancel</Button>
               </DrawerClose>
             </DrawerFooter>
           </form>
