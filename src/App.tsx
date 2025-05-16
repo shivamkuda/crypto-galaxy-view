@@ -32,23 +32,25 @@ const App = () => (
       <AuthProvider>
         <CurrencyProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/crypto/:id" element={<CryptoDetail />} />
-                <Route path="/trending" element={<Trending />} />
-                <Route path="/wallet" element={
-                  <ProtectedRoute>
-                    <Wallet />
-                  </ProtectedRoute>
-                } />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <div className="bg-galaxy-bg min-h-screen">
+              <Toaster />
+              <Sonner theme="dark" className="bg-galaxy-card-bg border-galaxy-secondary/30" />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/crypto/:id" element={<CryptoDetail />} />
+                  <Route path="/trending" element={<Trending />} />
+                  <Route path="/wallet" element={
+                    <ProtectedRoute>
+                      <Wallet />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </div>
           </TooltipProvider>
         </CurrencyProvider>
       </AuthProvider>

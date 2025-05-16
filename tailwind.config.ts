@@ -23,16 +23,16 @@ export default {
         'xs': '480px',
       },
       colors: {
-        // Galaxy theme colors
+        // Updated Galaxy theme colors to be more Binance-like
         galaxy: {
-          bg: "#0F0E17",
-          primary: "#3A0CA3",
-          secondary: "#121063",
-          accent: "#4CC9F0",
-          negative: "#F72585",
-          positive: "#4CC9F0",
-          neutral: "#6E59A5",
-          "card-bg": "#1A1F2C",
+          bg: "#0B0E11",
+          primary: "#F0B90B", // Binance yellow
+          secondary: "#1E2026",
+          accent: "#F0B90B",
+          negative: "#EA3943", // Red for negative values
+          positive: "#03A66D", // Green for positive values
+          neutral: "#848E9C",
+          "card-bg": "#181A20",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

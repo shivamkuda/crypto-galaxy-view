@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Wallet, TrendingUp, LogIn, LogOut, UserCircle2, Menu, User } from 'lucide-react';
+import { Wallet, TrendingUp, LogIn, LogOut, User, Menu, ChartLine } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import CurrencyToggle from './CurrencyToggle';
@@ -39,11 +39,12 @@ const Header: React.FC = () => {
   };
 
   const NavLinks = () => (
-    <ul className="flex items-center space-x-2">
+    <ul className="flex items-center space-x-1">
       <li>
         <Button
-          variant={location.pathname === "/" ? "default" : "outline"}
+          variant={location.pathname === "/" ? "default" : "ghost"}
           size="sm"
+          className={location.pathname === "/" ? "bg-transparent border-b-2 border-galaxy-primary text-white rounded-none" : "text-gray-300 hover:text-white"}
           asChild
         >
           <Link to="/">Market</Link>
@@ -51,8 +52,9 @@ const Header: React.FC = () => {
       </li>
       <li>
         <Button
-          variant={location.pathname === "/trending" ? "default" : "outline"}
+          variant={location.pathname === "/trending" ? "default" : "ghost"}
           size="sm"
+          className={location.pathname === "/trending" ? "bg-transparent border-b-2 border-galaxy-primary text-white rounded-none" : "text-gray-300 hover:text-white"}
           asChild
         >
           <Link to="/trending">
@@ -65,8 +67,9 @@ const Header: React.FC = () => {
         <>
           <li>
             <Button
-              variant={location.pathname === "/wallet" ? "default" : "outline"}
+              variant={location.pathname === "/wallet" ? "default" : "ghost"}
               size="sm"
+              className={location.pathname === "/wallet" ? "bg-transparent border-b-2 border-galaxy-primary text-white rounded-none" : "text-gray-300 hover:text-white"}
               asChild
             >
               <Link to="/wallet">
@@ -79,36 +82,24 @@ const Header: React.FC = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  {user.photoUrl ? (
-                    <Avatar className="h-9 w-9 border border-galaxy-accent">
-                      <AvatarImage src={user.photoUrl} alt={user.username} />
-                      <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback className="bg-galaxy-accent text-white">
-                        {user.username.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
+                  <Avatar className="h-8 w-8 border-2 border-galaxy-primary">
+                    <AvatarFallback className="bg-galaxy-secondary text-white">
+                      {user.username?.charAt(0).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56 bg-galaxy-card-bg border border-galaxy-secondary/30" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user.username}</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
-                    {user.id && (
-                      <p className="text-xs leading-none text-muted-foreground mt-1">
-                        ID: {user.id}
-                      </p>
-                    )}
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
+                <DropdownMenuSeparator className="bg-galaxy-secondary/30" />
+                <DropdownMenuItem onClick={handleLogout} className="text-galaxy-negative cursor-pointer hover:bg-galaxy-secondary/30">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -122,7 +113,7 @@ const Header: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              className="border-galaxy-accent text-galaxy-accent"
+              className="border-galaxy-primary/70 text-galaxy-primary hover:bg-galaxy-primary/10"
               asChild
             >
               <Link to="/login">
@@ -135,11 +126,11 @@ const Header: React.FC = () => {
             <Button
               variant="default"
               size="sm"
-              className="bg-galaxy-accent hover:bg-galaxy-accent/90"
+              className="bg-galaxy-primary text-black hover:bg-galaxy-primary/90"
               asChild
             >
               <Link to="/signup">
-                {!isMobile && <UserCircle2 className="mr-2 h-4 w-4" />}
+                {!isMobile && <User className="mr-2 h-4 w-4" />}
                 Sign Up
               </Link>
             </Button>
@@ -150,45 +141,45 @@ const Header: React.FC = () => {
   );
 
   return (
-    <header className="bg-galaxy-secondary py-4 shadow-md">
+    <header className="bg-galaxy-bg border-b border-galaxy-secondary/30 py-3 sticky top-0 z-20">
       <div className="container mx-auto px-4">
         <div className="flex flex-row items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <Wallet className="h-6 w-6 text-galaxy-accent" />
-              <span className="font-bold text-lg bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
-                CryptoGalaxyView
+              <ChartLine className="h-6 w-6 text-galaxy-primary" />
+              <span className="font-bold text-lg text-white">
+                <span className="text-galaxy-primary">Crypto</span>Exchange
               </span>
             </Link>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <CurrencyToggle />
-          </div>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:block">
-            <NavLinks />
-          </nav>
-          
-          {/* Mobile Navigation */}
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="bg-galaxy-card-bg border-galaxy-secondary">
-                <div className="flex flex-col h-full">
-                  <div className="flex-1 py-8">
-                    <div className="flex flex-col space-y-4">
-                      <NavLinks />
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:block">
+              <NavLinks />
+            </nav>
+            
+            {/* Mobile Navigation */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-white">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="bg-galaxy-card-bg border-galaxy-secondary/30">
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1 py-8">
+                      <div className="flex flex-col space-y-4">
+                        <NavLinks />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>

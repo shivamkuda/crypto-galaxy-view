@@ -18,18 +18,18 @@ const PriceDisplay: React.FC<PriceDisplayProps> = ({
   if (currentPrice === null) return null;
 
   return (
-    <div className={`mb-4 flex items-center ${priceChangeColor} transition-colors duration-300`}>
-      <span className="text-xl font-bold mr-2">
+    <div className="mb-4 flex items-center space-x-2">
+      <span className="text-2xl font-bold text-white">
         {typeof currentPrice === 'number' ? formatPrice(currentPrice) : 'N/A'}
       </span>
       {priceChange !== 0 && (
-        <span className="text-sm font-medium">
-          {priceChange > 0 ? '+' : ''}{priceChange.toFixed(2)}
+        <span className={`${priceChangeColor} text-sm font-medium px-1.5 py-0.5 rounded bg-opacity-20 ${priceChangeColor === 'text-galaxy-positive' ? 'bg-galaxy-positive/10' : 'bg-galaxy-negative/10'}`}>
+          {priceChange > 0 ? '+' : ''}{priceChange.toFixed(2)}%
         </span>
       )}
-      <span className="ml-2 relative flex h-3 w-3">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-galaxy-accent opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-3 w-3 bg-galaxy-accent"></span>
+      <span className="ml-1 relative flex h-2 w-2">
+        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${priceChangeColor === 'text-galaxy-positive' ? 'bg-galaxy-positive' : 'bg-galaxy-negative'} opacity-75`}></span>
+        <span className={`relative inline-flex rounded-full h-2 w-2 ${priceChangeColor === 'text-galaxy-positive' ? 'bg-galaxy-positive' : 'bg-galaxy-negative'}`}></span>
       </span>
     </div>
   );
