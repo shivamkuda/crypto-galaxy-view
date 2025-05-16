@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchCoinGeckoChart, fetchCurrentPrice } from '@/utils/cryptoApi';
 import { usePriceUpdates } from '@/hooks/usePriceUpdates';
+import { useCurrency } from '@/contexts/CurrencyContext';
 import TimeRangeSelector from '@/components/chart/TimeRangeSelector';
 import PriceDisplay from '@/components/chart/PriceDisplay';
 import PriceLineChart from '@/components/chart/PriceLineChart';
@@ -16,6 +17,7 @@ interface PriceChartProps {
 const PriceChart: React.FC<PriceChartProps> = ({ cryptoId }) => {
   const [timeRange, setTimeRange] = useState<number>(7); // Default to 7 days
   const [retryCount, setRetryCount] = useState(0);
+  const { currency } = useCurrency();
   
   // Use our custom hook for price updates
   const {

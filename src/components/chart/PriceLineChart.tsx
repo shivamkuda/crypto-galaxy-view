@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { formatDate, formatPriceTooltip } from '@/utils/formatters';
+import { formatDate } from '@/utils/formatters';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface ChartDataPoint {
   timestamp: number;
@@ -15,6 +16,13 @@ interface PriceLineChartProps {
 }
 
 const PriceLineChart: React.FC<PriceLineChartProps> = ({ data, timeRange, lineColor }) => {
+  const { formatPrice, currencySymbol } = useCurrency();
+  
+  // Format tooltip price values
+  const formatPriceTooltip = (value: number): string => {
+    return formatPrice(value);
+  };
+  
   return (
     <div className="p-4 bg-galaxy-card-bg rounded-lg border border-galaxy-secondary">
       <ResponsiveContainer width="100%" height={300}>
@@ -33,7 +41,7 @@ const PriceLineChart: React.FC<PriceLineChartProps> = ({ data, timeRange, lineCo
             domain={['auto', 'auto']}
             tick={{ fill: '#8E9196' }}
             stroke="#323232"
-            tickFormatter={(value) => `$${value.toFixed(2)}`}
+            tickFormatter={(value) => formatPrice(value)}
             width={80}
           />
           <Tooltip 

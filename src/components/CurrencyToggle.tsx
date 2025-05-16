@@ -25,6 +25,14 @@ const CurrencyToggle: React.FC = () => {
       >
         <span className="mr-1 text-lg leading-none">₹</span> INR
       </Button>
+      <Button
+        variant={currency === 'btc' ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setCurrency('btc')}
+        className="flex items-center"
+      >
+        <Bitcoin className="h-4 w-4 mr-1" /> BTC
+      </Button>
     </div>
   );
 };

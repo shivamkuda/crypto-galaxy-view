@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useCurrency } from '@/contexts/CurrencyContext';
 
 interface PriceDisplayProps {
   currentPrice: number | null;
@@ -12,12 +13,14 @@ const PriceDisplay: React.FC<PriceDisplayProps> = ({
   priceChange,
   priceChangeColor
 }) => {
+  const { formatPrice, currencySymbol } = useCurrency();
+  
   if (currentPrice === null) return null;
 
   return (
     <div className={`mb-4 flex items-center ${priceChangeColor} transition-colors duration-300`}>
       <span className="text-xl font-bold mr-2">
-        ${typeof currentPrice === 'number' ? currentPrice.toFixed(2) : '0.00'}
+        {typeof currentPrice === 'number' ? formatPrice(currentPrice) : 'N/A'}
       </span>
       {priceChange !== 0 && (
         <span className="text-sm font-medium">
