@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useCurrency } from '@/contexts/CurrencyContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SellModalProps {
   cryptoId: string;
@@ -40,6 +41,7 @@ const SellModal: React.FC<SellModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const { formatPrice } = useCurrency();
+  const isMobile = useIsMobile();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -94,29 +96,29 @@ const SellModal: React.FC<SellModalProps> = ({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
+        <Button variant="outline" size={isMobile ? "sm" : "sm"} className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white text-xs sm:text-sm px-2 sm:px-3">
           <TrendingDown className="mr-1 h-3 w-3" />
-          Sell
+          {!isMobile && "Sell"}
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bg-galaxy-card-bg border-t border-galaxy-secondary">
-        <DrawerHeader>
-          <DrawerTitle className="text-xl">Sell {cryptoName}</DrawerTitle>
-          <DrawerDescription>
-            Current price: {formatPrice(currentPrice)} | Available: {availableAmount.toFixed(8)} {cryptoSymbol}
+      <DrawerContent className="bg-galaxy-card-bg border-t border-galaxy-secondary max-h-[90vh]">
+        <DrawerHeader className="px-4 sm:px-6">
+          <DrawerTitle className="text-lg sm:text-xl">Sell {cryptoName}</DrawerTitle>
+          <DrawerDescription className="text-sm">
+            Current price: {formatPrice(currentPrice)} | Available: {availableAmount.toFixed(6)} {cryptoSymbol}
           </DrawerDescription>
         </DrawerHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSell)} className="p-4 space-y-4">
+          <form onSubmit={form.handleSubmit(handleSell)} className="p-4 sm:p-6 space-y-4">
             <div className="space-y-2">
-              <FormLabel>Quick Sell Options</FormLabel>
+              <FormLabel className="text-sm sm:text-base">Quick Sell Options</FormLabel>
               <div className="grid grid-cols-4 gap-2">
                 <Button 
                   type="button" 
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleQuickSell(25)}
-                  className="text-xs"
+                  className="text-xs sm:text-sm py-2 h-8 sm:h-9"
                 >
                   25%
                 </Button>
@@ -125,7 +127,7 @@ const SellModal: React.FC<SellModalProps> = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleQuickSell(50)}
-                  className="text-xs"
+                  className="text-xs sm:text-sm py-2 h-8 sm:h-9"
                 >
                   50%
                 </Button>
@@ -134,7 +136,7 @@ const SellModal: React.FC<SellModalProps> = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleQuickSell(75)}
-                  className="text-xs"
+                  className="text-xs sm:text-sm py-2 h-8 sm:h-9"
                 >
                   75%
                 </Button>
@@ -143,7 +145,7 @@ const SellModal: React.FC<SellModalProps> = ({
                   variant="outline" 
                   size="sm" 
                   onClick={() => handleQuickSell(100)}
-                  className="text-xs"
+                  className="text-xs sm:text-sm py-2 h-8 sm:h-9"
                 >
                   100%
                 </Button>
@@ -155,19 +157,19 @@ const SellModal: React.FC<SellModalProps> = ({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount to sell ({cryptoSymbol})</FormLabel>
+                  <FormLabel className="text-sm sm:text-base">Amount to sell ({cryptoSymbol})</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       placeholder={`Enter ${cryptoSymbol} amount`}
-                      className="bg-galaxy-secondary/30"
+                      className="bg-galaxy-secondary/30 text-sm sm:text-base h-10 sm:h-11"
                       step="any"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs sm:text-sm" />
                   {estimatedValue > 0 && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       You will receive approximately {formatPrice(estimatedValue)}
                     </p>
                   )}
@@ -179,12 +181,14 @@ const SellModal: React.FC<SellModalProps> = ({
               <Button 
                 type="submit"
                 disabled={isLoading}
-                className="bg-red-600 text-white hover:bg-red-700"
+                className="bg-red-600 text-white hover:bg-red-700 text-sm sm:text-base h-10 sm:h-11"
               >
                 {isLoading ? 'Processing Sale...' : 'Confirm Sale'}
               </Button>
               <DrawerClose asChild>
-                <Button variant="outline" onClick={() => form.reset()}>Cancel</Button>
+                <Button variant="outline" onClick={() => form.reset()} className="text-sm sm:text-base h-10 sm:h-11">
+                  Cancel
+                </Button>
               </DrawerClose>
             </DrawerFooter>
           </form>

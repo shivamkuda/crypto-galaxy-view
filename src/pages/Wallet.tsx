@@ -33,10 +33,12 @@ const WalletPage = () => {
   const [sortConfig, setSortConfig] = useState({ key: 'value', direction: 'desc' });
   const { formatPrice } = useCurrency();
   
-  const { data: cryptoData, isLoading } = useQuery({
+  // Enhanced query with better refetch intervals for accurate prices
+  const { data: cryptoData, isLoading, refetch } = useQuery({
     queryKey: ['crypto-prices'],
-    queryFn: () => fetchCryptoList(1, 20),
-    staleTime: 60000, // 1 minute
+    queryFn: () => fetchCryptoList(1, 50), // Fetch more coins for better coverage
+    staleTime: 30000, // 30 seconds
+    refetchInterval: 60000, // Refetch every minute for accurate prices
   });
   
   // Update portfolio with current prices
@@ -170,139 +172,138 @@ const WalletPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent animate-slide-up">
-          Your Crypto Wallet
-        </h1>
+      <main className="flex-1 container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 sm:mb-0 bg-gradient-to-r from-galaxy-accent to-galaxy-positive bg-clip-text text-transparent">
+            Your Crypto Wallet
+          </h1>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+            className="self-start sm:self-auto"
+          >
+            Refresh Prices
+          </Button>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-6 animate-slide-up">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <Wallet className="mr-2 h-5 w-5 text-galaxy-accent" />
-              Available Balance
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6 sm:mb-8">
+          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-4 sm:p-6 animate-slide-up">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center">
+              <Wallet className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-galaxy-accent" />
+              <span className="text-sm sm:text-base">Available Balance</span>
             </h2>
-            <p className="text-3xl font-bold mb-2">{formatPrice(walletBalance)}</p>
-            <div className="flex gap-2 mt-4">
-              <Button className="bg-galaxy-accent text-galaxy-bg hover:bg-galaxy-accent/90">
-                <CreditCard className="mr-2 h-4 w-4" />
+            <p className="text-2xl sm:text-3xl font-bold mb-2">{formatPrice(walletBalance)}</p>
+            <div className="flex gap-2 mt-3 sm:mt-4">
+              <Button className="bg-galaxy-accent text-galaxy-bg hover:bg-galaxy-accent/90 text-sm sm:text-base px-3 sm:px-4">
+                <CreditCard className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 Add Funds
               </Button>
             </div>
           </div>
           
-          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <Coins className="mr-2 h-5 w-5 text-galaxy-accent" />
-              Portfolio Value
+          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-4 sm:p-6 animate-slide-up" style={{ animationDelay: '100ms' }}>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 flex items-center">
+              <Coins className="mr-2 h-4 w-4 sm:h-5 sm:w-5 text-galaxy-accent" />
+              <span className="text-sm sm:text-base">Portfolio Value</span>
             </h2>
-            <p className="text-3xl font-bold mb-2">{formatPrice(totalPortfolioValue)}</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-2xl sm:text-3xl font-bold mb-2">{formatPrice(totalPortfolioValue)}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {isLoading ? 'Loading portfolio data...' : `${portfolio.length} assets in your portfolio`}
             </p>
           </div>
           
-          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-            <h2 className="text-xl font-semibold mb-4">Total Profit/Loss</h2>
-            <p className={`text-3xl font-bold mb-2 ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              {formatPrice(totalPnL)} ({totalPnLPercentage.toFixed(2)}%)
+          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-4 sm:p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
+            <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4">Total Profit/Loss</h2>
+            <p className={`text-xl sm:text-3xl font-bold mb-2 ${totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {formatPrice(totalPnL)} 
+              <span className="text-sm sm:text-lg ml-1">({totalPnLPercentage.toFixed(2)}%)</span>
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {isLoading ? 'Calculating...' : `Since your first purchase`}
             </p>
           </div>
         </div>
         
-        <div className="mb-8 animate-slide-up" style={{ animationDelay: '200ms' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Your Portfolio</h2>
+        <div className="mb-6 sm:mb-8 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-lg sm:text-xl font-bold">Your Portfolio</h2>
           </div>
           
           <Card className="bg-galaxy-card-bg border-galaxy-secondary">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Assets Overview</CardTitle>
-              <CardDescription>Track your cryptocurrency portfolio performance</CardDescription>
+            <CardHeader className="pb-2 px-3 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">Assets Overview</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Track your cryptocurrency portfolio performance</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-3 sm:px-6">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-b border-galaxy-secondary">
-                      <TableHead 
-                        className="cursor-pointer" 
-                        onClick={() => requestSort('name')}
-                      >
+                      <TableHead className="cursor-pointer text-xs sm:text-sm px-2 sm:px-4" onClick={() => requestSort('name')}>
                         Asset {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                       </TableHead>
-                      <TableHead 
-                        className="text-right cursor-pointer" 
-                        onClick={() => requestSort('price')}
-                      >
+                      <TableHead className="text-right cursor-pointer text-xs sm:text-sm px-2 sm:px-4" onClick={() => requestSort('price')}>
                         Price {sortConfig.key === 'price' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                       </TableHead>
-                      <TableHead 
-                        className="text-right cursor-pointer" 
-                        onClick={() => requestSort('amount')}
-                      >
+                      <TableHead className="text-right cursor-pointer text-xs sm:text-sm px-2 sm:px-4 hidden sm:table-cell" onClick={() => requestSort('amount')}>
                         Holdings {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                       </TableHead>
-                      <TableHead 
-                        className="text-right cursor-pointer" 
-                        onClick={() => requestSort('value')}
-                      >
+                      <TableHead className="text-right cursor-pointer text-xs sm:text-sm px-2 sm:px-4" onClick={() => requestSort('value')}>
                         Value {sortConfig.key === 'value' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                       </TableHead>
-                      <TableHead 
-                        className="text-right cursor-pointer" 
-                        onClick={() => requestSort('pnl')}
-                      >
-                        Profit/Loss {sortConfig.key === 'pnl' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                      <TableHead className="text-right cursor-pointer text-xs sm:text-sm px-2 sm:px-4 hidden md:table-cell" onClick={() => requestSort('pnl')}>
+                        P&L {sortConfig.key === 'pnl' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                       </TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="text-right text-xs sm:text-sm px-2 sm:px-4">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {isLoading ? (
                       [...Array(3)].map((_, i) => (
                         <TableRow key={i} className="border-b border-galaxy-secondary/50">
-                          <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-                          <TableCell className="text-right"><Skeleton className="h-6 w-16 ml-auto" /></TableCell>
-                          <TableCell className="text-right"><Skeleton className="h-6 w-20 ml-auto" /></TableCell>
-                          <TableCell className="text-right"><Skeleton className="h-6 w-24 ml-auto" /></TableCell>
-                          <TableCell className="text-right"><Skeleton className="h-6 w-24 ml-auto" /></TableCell>
-                          <TableCell className="text-right"><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                          <TableCell className="px-2 sm:px-4"><Skeleton className="h-4 sm:h-6 w-20 sm:w-24" /></TableCell>
+                          <TableCell className="text-right px-2 sm:px-4"><Skeleton className="h-4 sm:h-6 w-12 sm:w-16 ml-auto" /></TableCell>
+                          <TableCell className="text-right px-2 sm:px-4 hidden sm:table-cell"><Skeleton className="h-4 sm:h-6 w-16 sm:w-20 ml-auto" /></TableCell>
+                          <TableCell className="text-right px-2 sm:px-4"><Skeleton className="h-4 sm:h-6 w-16 sm:w-24 ml-auto" /></TableCell>
+                          <TableCell className="text-right px-2 sm:px-4 hidden md:table-cell"><Skeleton className="h-4 sm:h-6 w-16 sm:w-24 ml-auto" /></TableCell>
+                          <TableCell className="text-right px-2 sm:px-4"><Skeleton className="h-6 sm:h-8 w-12 sm:w-16 ml-auto" /></TableCell>
                         </TableRow>
                       ))
                     ) : sortedPortfolio.length > 0 ? (
                       sortedPortfolio.map((asset) => (
                         <TableRow key={asset.id} className="border-b border-galaxy-secondary/50">
-                          <TableCell>
-                            <div className="flex items-center">
-                              <span className="font-medium">{asset.name}</span>
-                              <span className="ml-2 text-sm text-muted-foreground">{asset.symbol}</span>
+                          <TableCell className="px-2 sm:px-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center">
+                              <span className="font-medium text-xs sm:text-sm">{asset.name}</span>
+                              <span className="sm:ml-2 text-xs text-muted-foreground">{asset.symbol}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right px-2 sm:px-4 text-xs sm:text-sm">
                             {formatPrice(asset.price)}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right px-2 sm:px-4 hidden sm:table-cell">
                             <div className="flex flex-col items-end">
-                              <span>{asset.amount.toFixed(8)}</span>
+                              <span className="text-xs sm:text-sm">{asset.amount.toFixed(6)}</span>
                               <span className="text-xs text-muted-foreground">
-                                Avg Buy: {formatPrice(asset.purchasePrice)}
+                                Avg: {formatPrice(asset.purchasePrice)}
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right px-2 sm:px-4 text-xs sm:text-sm">
                             {formatPrice(asset.value || 0)}
+                            <div className="sm:hidden text-xs text-muted-foreground">
+                              {asset.amount.toFixed(4)} {asset.symbol}
+                            </div>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <div className={`flex flex-col items-end ${(asset.pnl || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          <TableCell className="text-right px-2 sm:px-4 hidden md:table-cell">
+                            <div className={`flex flex-col items-end text-xs sm:text-sm ${(asset.pnl || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                               <span>{formatPrice(asset.pnl || 0)}</span>
                               <span className="text-xs">{(asset.pnlPercentage || 0).toFixed(2)}%</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
+                          <TableCell className="text-right px-2 sm:px-4">
+                            <div className="flex justify-end gap-1 sm:gap-2">
                               <WalletModal 
                                 cryptoId={asset.id} 
                                 cryptoName={asset.name} 
@@ -323,7 +324,7 @@ const WalletPage = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="p-8 text-center text-muted-foreground">
+                        <TableCell colSpan={6} className="p-6 sm:p-8 text-center text-muted-foreground text-sm">
                           You don't have any assets yet. Start by buying some crypto.
                         </TableCell>
                       </TableRow>
@@ -335,29 +336,32 @@ const WalletPage = () => {
           </Card>
         </div>
         
-        <div className="mb-8 animate-slide-up" style={{ animationDelay: '300ms' }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Buy Cryptocurrency</h2>
+        <div className="mb-6 sm:mb-8 animate-slide-up" style={{ animationDelay: '300ms' }}>
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 className="text-lg sm:text-xl font-bold">Buy Cryptocurrency</h2>
           </div>
           
-          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-galaxy-card-bg rounded-lg border border-galaxy-secondary p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {isLoading ? (
-                [...Array(3)].map((_, i) => (
-                  <div key={i} className="p-4 border border-galaxy-secondary rounded-lg">
-                    <Skeleton className="h-6 w-24 mb-2" />
-                    <Skeleton className="h-8 w-32 mb-2" />
+                [...Array(6)].map((_, i) => (
+                  <div key={i} className="p-3 sm:p-4 border border-galaxy-secondary rounded-lg">
+                    <Skeleton className="h-4 sm:h-6 w-20 sm:w-24 mb-2" />
+                    <Skeleton className="h-6 sm:h-8 w-24 sm:w-32 mb-2" />
                     <Skeleton className="h-8 w-full" />
                   </div>
                 ))
               ) : (
                 cryptoData?.slice(0, 6).map(crypto => (
-                  <div key={crypto.id} className="p-4 border border-galaxy-secondary rounded-lg">
+                  <div key={crypto.id} className="p-3 sm:p-4 border border-galaxy-secondary rounded-lg">
                     <div className="flex items-center mb-2">
-                      <img src={crypto.image} alt={crypto.name} className="w-6 h-6 mr-2" />
-                      <span className="font-medium">{crypto.name}</span>
+                      <img src={crypto.image} alt={crypto.name} className="w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+                      <span className="font-medium text-sm sm:text-base">{crypto.name}</span>
                     </div>
-                    <p className="text-lg font-bold mb-3">{formatPrice(crypto.current_price)}</p>
+                    <p className="text-base sm:text-lg font-bold mb-2 sm:mb-3">{formatPrice(crypto.current_price)}</p>
+                    <div className={`text-xs sm:text-sm mb-2 ${crypto.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {crypto.price_change_percentage_24h >= 0 ? '+' : ''}{crypto.price_change_percentage_24h?.toFixed(2)}% (24h)
+                    </div>
                     <WalletModal 
                       cryptoId={crypto.id} 
                       cryptoName={crypto.name} 
@@ -372,8 +376,8 @@ const WalletPage = () => {
         </div>
       </main>
       
-      <footer className="py-6 bg-galaxy-secondary mt-auto">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+      <footer className="py-4 sm:py-6 bg-galaxy-secondary mt-auto">
+        <div className="container mx-auto px-3 sm:px-4 text-center text-xs sm:text-sm text-muted-foreground">
           <p>CryptoGalaxyView © {new Date().getFullYear()} | Real-time cryptocurrency market data</p>
           <p className="mt-1">Data provided by CoinGecko API</p>
         </div>
