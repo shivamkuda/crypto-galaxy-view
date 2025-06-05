@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Wallet, CreditCard, ArrowUpDown, Coins } from 'lucide-react';
 import WalletModal from '@/components/WalletModal';
+import SellModal from '@/components/SellModal';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCryptoList } from '@/utils/api';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -107,6 +107,41 @@ const WalletPage = () => {
     }
     
     toast.success(`Successfully purchased ${cryptoAmount.toFixed(8)} ${crypto.name}`);
+  };
+  
+  // Handle selling crypto
+  const handleSellCrypto = (cryptoId: string, amount: number, price: number) => {
+    const usdValue = amount * price;
+    
+    // Update wallet balance
+    setWalletBalance(prev => prev + usdValue);
+    
+    // Update portfolio
+    const updatedPortfolio = portfolio.map(item => {
+      if (item.id === cryptoId) {
+        const newAmount = item.amount - amount;
+        
+        if (newAmount <= 0) {
+          // Remove from portfolio if amount is 0 or less
+          return null;
+        }
+        
+        return {
+          ...item,
+          amount: newAmount,
+          value: newAmount * price,
+          pnl: (price - item.purchasePrice) * newAmount,
+          pnlPercentage: (price - item.purchasePrice) / item.purchasePrice * 100
+        };
+      }
+      return item;
+    }).filter(Boolean) as PortfolioItem[];
+    
+    setPortfolio(updatedPortfolio);
+    
+    // Get crypto details for toast
+    const crypto = cryptoData?.find(c => c.id === cryptoId);
+    toast.success(`Successfully sold ${amount.toFixed(8)} ${crypto?.name || cryptoId}`);
   };
   
   // Handle sorting
@@ -273,6 +308,14 @@ const WalletPage = () => {
                                 cryptoName={asset.name} 
                                 currentPrice={asset.price} 
                                 onPurchaseComplete={handleBuyCrypto}
+                              />
+                              <SellModal
+                                cryptoId={asset.id}
+                                cryptoName={asset.name}
+                                cryptoSymbol={asset.symbol}
+                                currentPrice={asset.price}
+                                availableAmount={asset.amount}
+                                onSellComplete={handleSellCrypto}
                               />
                             </div>
                           </TableCell>
